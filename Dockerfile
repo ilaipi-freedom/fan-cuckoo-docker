@@ -27,7 +27,10 @@ RUN apt-get install -y  libpq-dev && pip install -U psycopg2
 RUN useradd -ms /bin/bash cuckoo && \
   usermod -aG sudo cuckoo
 
-USER cuckoo
+COPY ./docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
+USER cuckoo
+ENTRYPOINT ["/entrypoint.sh"]
+# CMD ["cuckoo", "-d"]
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["cuckoo", "-d"]
