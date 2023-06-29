@@ -10,8 +10,13 @@ docker rm -f cuckoo-es
 docker rm -f cuckoo
 
 docker run -dit --name cuckoo-mongodb \
+  --restart always \
   -v cuckoo-mongodb-data:/data/db \
-  mongo:4.0.28
+  -e MONGO_INITDB_ROOT_USERNAME=root \
+  -e MONGO_INITDB_ROOT_PASSWORD=wViWwYOUsmRbd0KAMU \
+  -e MONGO_INITDB_DATABASE=admin \
+  -v $PWD/mongodb/:/docker-entrypoint-initdb.d/ \
+  mongo:5
 
 docker volume create cuckoo-postgres-data
 
@@ -32,6 +37,8 @@ docker run -dit --name cuckoo \
   --link cuckoo-postgres \
   --link cuckoo-mongodb \
   --link cuckoo-es \
-  -w /home/cuckoo \
-  -v $PWD:/home/cuckoo \
+  -w /home/cuckoo/ \
+  -v $PWD/tmp/:/home/cuckoo/ \
+  -v $PWD/conf:/home/cuckoo/.cuckoo/conf \
+  -p 33888:8000 \
   ilaipi/cuckoo:1.0
