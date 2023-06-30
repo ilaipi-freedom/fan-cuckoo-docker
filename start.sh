@@ -40,6 +40,6 @@ docker run -dit --name cuckoo \
   -w /home/cuckoo/ \
   -v $PWD/tmp/:/home/cuckoo/ \
   -v $PWD/conf:/home/cuckoo/.cuckoo/conf \
-  -p 33888:8000 \
+  -p 32768:8000 \
   ilaipi/cuckoo:1.0 \
   8000
