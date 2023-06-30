@@ -15,7 +15,12 @@ esVolumeName="cuckoo-es-data"
 
 docker build -t $cuckooImageName:$cuckooImageTag .
 
-docker network create $networkName
+if ! docker network inspect $networkName >/dev/null 2>&1; then
+    docker network create $networkName
+    echo "INFO: Docker Network $networkName created successfully"
+else
+    echo "INFO: Docker Network $networkName already exists"
+fi
 
 docker rm -f $mongoContainerName
 docker rm -f $pgContainerName
