@@ -37,9 +37,14 @@ docker run -dit --name cuckoo \
   --link cuckoo-postgres \
   --link cuckoo-mongodb \
   --link cuckoo-es \
+  --device=/dev/kvm \
+  --privileged \
+  -e DISPLAY=${DISPLAY} \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
   -w /home/cuckoo/ \
   -v $PWD/tmp/:/home/cuckoo/ \
   -v $PWD/conf:/home/cuckoo/.cuckoo/conf \
   -p 32768:8000 \
+  -p 32771:2042 \
   ilaipi/cuckoo:1.0 \
   8000

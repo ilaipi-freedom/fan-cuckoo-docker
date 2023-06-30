@@ -23,6 +23,13 @@ RUN apt-get install -y libjpeg-dev zlib1g-dev swig tcpdump apparmor-utils
 RUN pip install -U pip setuptools
 RUN pip install -U cuckoo
 RUN apt-get install -y  libpq-dev && pip install -U psycopg2
+RUN apt-get install -y bridge-utils iproute2
+
+RUN  apt-get install -y libvirt-daemon-system libvirt-clients \
+  bridge-utils virtinst virt-manager cpu-checker
+
+RUN apt-get install -y sudo && \
+    echo 'cuckoo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 RUN useradd -ms /bin/bash cuckoo && \
   usermod -aG sudo cuckoo
