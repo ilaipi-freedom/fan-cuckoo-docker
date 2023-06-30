@@ -1,16 +1,18 @@
 #!/bin/sh
 
 if [ ! -d "/home/cuckoo/.cuckoo/log" ]; then
-    mkdir -p /home/cuckoo/.cuckoo/log
+    sudo mkdir -p /home/cuckoo/.cuckoo/log
 fi
 
 if [ ! -d "/home/cuckoo/.cuckoo/yara" ]; then
-    mkdir -p /home/cuckoo/.cuckoo/yara
+    sudo mkdir -p /home/cuckoo/.cuckoo/yara
 fi
 
 if [ ! -f "/home/cuckoo/.cuckoo/.cwd" ]; then
-    touch /home/cuckoo/.cuckoo/.cwd
+    sudo touch /home/cuckoo/.cuckoo/.cwd
 fi
+
+sudo chmod -R 777 /home/cuckoo/.cuckoo
 
 cuckoo -d || true
 
