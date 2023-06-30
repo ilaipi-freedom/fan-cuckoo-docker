@@ -1,42 +1,64 @@
 #!/bin/sh
 
-docker build -t ilaipi/cuckoo:1.0 .
+networkName="cuckoo-network"
+cuckooImageName="ilaipi/cuckoo"
+cuckooImageTag="1.0"
 
-docker volume create cuckoo-mongodb-data
+mongoContainerName="cuckoo-mongodb"
+pgContainerName="cuckoo-postgres"
+esContainerName="cuckoo-es"
+cuckooContainerName="cuckoo"
 
-docker rm -f cuckoo-mongodb
-docker rm -f cuckoo-postgres
-docker rm -f cuckoo-es
-docker rm -f cuckoo
+mongoVolumeName="cuckoo-mongodb-data"
+pgVolumeName="cuckoo-postgres-data"
+esVolumeName="cuckoo-es-data"
 
-docker run -dit --name cuckoo-mongodb \
+docker build -t $cuckooImageName:$cuckooImageTag .
+
+docker network create $networkName
+
+docker rm -f $mongoContainerName
+docker rm -f $pgContainerName
+docker rm -f $esContainerName
+docker rm -f $cuckooContainerName
+
+docker volume create $mongoVolumeName
+
+docker run -dit --name $mongoContainerName \
   --restart always \
-  -v cuckoo-mongodb-data:/data/db \
+  --network $networkName \
+  -v $mongoVolumeName:/data/db \
   -e MONGO_INITDB_ROOT_USERNAME=root \
   -e MONGO_INITDB_ROOT_PASSWORD=wViWwYOUsmRbd0KAMU \
   -e MONGO_INITDB_DATABASE=admin \
   -v $PWD/mongodb/:/docker-entrypoint-initdb.d/ \
   mongo:5
 
-docker volume create cuckoo-postgres-data
+docker volume create $pgVolumeName
 
-docker run -dit --name cuckoo-postgres \
-  -v cuckoo-postgres-data:/var/lib/postgresql/data/pgdata \
+docker run -dit --name $pgContainerName \
+  --network $networkName \
+  -v $pgVolumeName:/var/lib/postgresql/data/pgdata \
   -e PGDATA=/var/lib/postgresql/data/pgdata \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=RSSEyXDZzLTLd4XgvD \
   postgres:15
 
-docker volume create cuckoo-es-data
+docker volume create $esVolumeName
 
-docker run -dit --name cuckoo-es \
+docker run -dit --name $esContainerName \
+  --network $networkName \
+  -v $esVolumeName:/usr/share/elasticsearch/data \
   -e "discovery.type=single-node" \
   elasticsearch:7.17.10
 
-docker run -dit --name cuckoo \
-  --link cuckoo-postgres \
-  --link cuckoo-mongodb \
-  --link cuckoo-es \
+# cuckoo 容器: 
+# 8000 端口是 cuckoo web 的端口
+# 2042 端口是 result server 的端口
+# 5900 端口是 qemu 启动虚拟机时， vnc server 的端口。实际可能不需要访问
+
+docker run -dit --name $cuckooContainerName \
+  --network $networkName \
   --device=/dev/kvm \
   --privileged \
   -e DISPLAY=${DISPLAY} \
@@ -46,5 +68,6 @@ docker run -dit --name cuckoo \
   -v $PWD/conf:/home/cuckoo/.cuckoo/conf \
   -p 32768:8000 \
   -p 32771:2042 \
-  ilaipi/cuckoo:1.0 \
+  -p 32772:5900 \
+  $cuckooImageName:$cuckooImageTag \
   8000
