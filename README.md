@@ -4,6 +4,8 @@
 ./start.sh
 ```
 
+sudo password: `YN02ZLX27eeeRmxQ`
+
 
 ```shell
 

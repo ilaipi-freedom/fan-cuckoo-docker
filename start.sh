@@ -1,5 +1,25 @@
 #!/bin/sh
 
+bridge_name="br0"
+host_ip=
+subnet_mask=
+
+# 检查桥接设备是否已存在
+if ! ip link show "$bridge_name" &> /dev/null; then
+
+  # 创建虚拟网络桥接
+  sudo brctl addbr "$bridge_name"
+  sudo ip addr add "$host_ip/$subnet_mask" dev "$bridge_name"
+  sudo ip link set dev "$bridge_name" up
+
+  # 配置网络转发
+  sudo sysctl net.ipv4.ip_forward=1
+  sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+else
+  echo "The bridge device '$bridge_name' already exists."
+fi
+
+
 networkName="cuckoo-network"
 cuckooImageName="ilaipi/cuckoo"
 cuckooImageTag="1.0"
