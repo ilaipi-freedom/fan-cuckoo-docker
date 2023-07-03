@@ -1,26 +1,10 @@
 #!/bin/sh
 
-bridge_name="br0"
-host_interface_name="ens160"
+tapName="tap0"
 
-# 检查桥接设备是否已存在
-if ! ip link show "$bridge_name" &> /dev/null; then
-
-  # 创建虚拟网络桥接
-  sudo brctl addbr "$bridge_name"
-  sudo brctl addif "$bridge_name" "$host_interface_name"
-  sudo ip link set dev "$bridge_name" up
-  sudo ip addr add 192.168.1.1/24 dev "$bridge_name"
-
-  # 配置网络转发
-  sudo sysctl net.ipv4.ip_forward=1
-  sudo iptables -A FORWARD -i $host_interface_name -o $bridge_name -s 192.168.1.0/24 -j ACCEPT
-  sudo iptables -A FORWARD -i $bridge_name -o $host_interface_name -d 192.168.1.0/24 -j ACCEPT
-  sudo iptables -t nat -A POSTROUTING -o $host_interface_name -j MASQUERADE
-else
-  echo "The bridge device '$bridge_name' already exists."
+if ! ip tuntap show $tapName > /dev/null 2>&1; then
+    sudo ip tuntap add $tapName mode tap
 fi
-
 
 networkName="cuckoo-network"
 cuckooImageName="ilaipi/cuckoo"
